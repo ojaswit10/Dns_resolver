@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -11,6 +12,11 @@ namespace dns {
 
 struct CacheEntry {
     ResourceRecord record;
+    std::chrono::steady_clock::time_point expires_at;
+};
+
+struct NegativeCacheEntry {
+    Rcode rcode;
     std::chrono::steady_clock::time_point expires_at;
 };
 
@@ -25,8 +31,19 @@ public:
     // Removes expired records from the cache.
     void remove_expired();
 
+    // Stores a negative DNS response using the SOA-derived TTL.
+    void put_negative(
+        const std::string& name,
+        RecordType type,
+        Rcode rcode,
+        const ResourceRecord& soa_record);
+
+    // Returns a valid negative response, or std::nullopt on a miss.
+    std::optional<Rcode> get_negative(const std::string& name, RecordType type);
+
 private:
     std::unordered_map<std::string, std::vector<CacheEntry>> entries_;
+    std::unordered_map<std::string, NegativeCacheEntry> negative_entries_;
 };
 
 }  // namespace dns
