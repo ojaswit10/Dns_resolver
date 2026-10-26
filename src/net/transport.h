@@ -19,8 +19,7 @@ struct TransportOptions {
 // Sends `query` to `server_ip` (dotted IPv4) and returns the raw response.
 // Replies whose ID does not match the query's ID are ignored.
 // Returns std::nullopt on timeout or socket error.
-std::optional<std::vector<uint8_t>> send_udp(const std::string& server_ip,
-                                             const std::vector<uint8_t>& query,
+std::optional<std::vector<uint8_t>> send_udp(const std::string& server_ip, const std::vector<uint8_t>& query,
                                              const TransportOptions& options = {});
 
 }  // namespace dns
