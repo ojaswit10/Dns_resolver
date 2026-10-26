@@ -67,11 +67,11 @@ AI assistant, paste the **Prompt** section below into it before you start.
 
 | Folder | Library | Owner |
 |---|---|---|
-| `src/dns/` (message, codec) | `dns_codec` | Ojaswit (shared: changes go through `main`) |
+| `src/dns/` (message, codec) | `dns_codec` | Riya (shared: changes go through `main`) |
 | `src/net/` (sockets, transport) | `dns_net` | Kavish (shared: changes go through `main`) |
-| `src/resolver/` | `dns_resolver` | Riya |
+| `src/resolver/` | `dns_resolver` | Ojaswit |
 | `src/cache/` | `dns_cache` | Bhardwaaj |
-| `src/server/` | `dns_server` | to be decided |
+| `src/server/` | `dns_server` | Ojaswit |
 | `src/common/` | (header only) | shared, don't edit |
 
 The top-level `CMakeLists.txt` already includes every folder above if it exists, so
