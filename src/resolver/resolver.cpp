@@ -87,6 +87,7 @@ ResolveResult Resolver::resolve_at_depth(const std::string& name, RecordType typ
 
     for (int hop = 0; hop <= options_.max_cname_hops; ++hop) {
         if (cache_) {
+            const auto lock = lock_cache();
             if (const auto negative = cache_->get_negative(current, type)) {
                 result.status = *negative == Rcode::NxDomain ? ResolveStatus::NxDomain : ResolveStatus::NoData;
                 log(depth, "cache: " + display(current) + " " + to_string(type) + " -> " + to_string(result.status));
@@ -176,6 +177,7 @@ ResolveResult Resolver::walk(const std::string& name, RecordType type, int depth
             result.status = ResolveStatus::NxDomain;
             result.soa = find_soa(message.authority);
             if (cache_ && result.soa) {
+                const auto lock = lock_cache();
                 cache_->put_negative(owner, type, Rcode::NxDomain, *result.soa);
             }
             log(depth, "  -> NXDOMAIN: " + display(owner) + " does not exist");
@@ -226,6 +228,7 @@ ResolveResult Resolver::walk(const std::string& name, RecordType type, int depth
             return result;
         }
         if (cache_ && result.soa) {
+            const auto lock = lock_cache();
             cache_->put_negative(name, type, Rcode::NoError, *result.soa);
         }
         result.status = ResolveStatus::NoData;
@@ -236,6 +239,7 @@ ResolveResult Resolver::walk(const std::string& name, RecordType type, int depth
 
 Resolver::ServerSet Resolver::closest_known_servers(const std::string& name, int depth) {
     if (cache_) {
+        const auto lock = lock_cache();
         for (std::string zone = name;; zone = parent_of(zone)) {
             ServerSet servers{zone, {}};
             for (const ResourceRecord& ns : cache_->get(zone, RecordType::NS)) {
@@ -355,6 +359,7 @@ void Resolver::cache_records(const std::vector<ResourceRecord>& records) {
     if (!cache_) {
         return;
     }
+    const auto lock = lock_cache();
     for (const ResourceRecord& record : records) {
         if (record.type == RecordType::OPT) {
             continue;
@@ -367,6 +372,10 @@ void Resolver::cache_records(const std::vector<ResourceRecord>& records) {
             cache_->put(record);
         }
     }
+}
+
+std::unique_lock<std::mutex> Resolver::lock_cache() {
+    return options_.cache_mutex ? std::unique_lock<std::mutex>(*options_.cache_mutex) : std::unique_lock<std::mutex>();
 }
 
 void Resolver::log(int depth, const std::string& line) {

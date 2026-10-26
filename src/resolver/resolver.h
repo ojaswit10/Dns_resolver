@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <random>
 #include <string>
@@ -28,6 +29,10 @@ struct ResolverOptions {
     TransportOptions transport = {1500, 1, 53};
     QueryFunction query;                    // empty = real UDP
     std::vector<std::string> root_servers;  // empty = built-in root hints
+
+    // Set when several Resolvers on different threads share one Cache: every
+    // cache call is made while holding this lock. Network calls are not.
+    std::mutex* cache_mutex = nullptr;
 };
 
 enum class ResolveStatus {
@@ -77,6 +82,7 @@ private:
     std::optional<Message> ask(const ServerSet& servers, const std::string& name, RecordType type, int depth);
 
     void cache_records(const std::vector<ResourceRecord>& records);
+    std::unique_lock<std::mutex> lock_cache();  // no-op lock when cache_mutex is unset
     void log(int depth, const std::string& line);
 
     Cache* cache_;
