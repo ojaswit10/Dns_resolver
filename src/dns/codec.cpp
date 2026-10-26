@@ -32,6 +32,17 @@ std::vector<std::string> split_labels(const std::string& name) {
         }
         start = dot + 1;
     }
+        // DNS wire-format names can be at most 255 bytes,
+    // including each label-length byte and the terminating root byte.
+    size_t wire_length = 1;
+
+    for (const auto& label : labels) {
+        wire_length += 1 + label.size();
+    }
+
+    if (wire_length > 255) {
+        throw ParseError("DNS name exceeds 255 bytes");
+    }
     return labels;
 }
 
@@ -274,7 +285,13 @@ void write_record(Writer& writer, const ResourceRecord& record) {
             break;
     }
 
-    writer.patch_u16(length_position, static_cast<uint16_t>(writer.size() - rdata_start));
+    size_t rdata_length = writer.size() - rdata_start;
+
+    if (rdata_length > 65535) {
+        throw ParseError("RDATA exceeds maximum length");
+    }
+
+    writer.patch_u16(length_position, static_cast<uint16_t>(rdata_length));
 }
 
 ResourceRecord read_record(Reader& reader) {
@@ -346,6 +363,14 @@ ResourceRecord read_record(Reader& reader) {
     if (inner.position() > rdata_end) {
         throw ParseError("RDATA longer than RDLENGTH");
     }
+
+    if ((record.type == RecordType::NS ||
+         record.type == RecordType::CNAME ||
+        record.type == RecordType::MX ||
+        record.type == RecordType::SOA) &&
+        inner.position() != rdata_end) {
+        throw ParseError("Unexpected trailing bytes in structured RDATA");
+    }
     return record;
 }
 
@@ -354,6 +379,13 @@ ResourceRecord read_record(Reader& reader) {
 std::vector<uint8_t> encode(const Message& message) {
     Writer writer;
     const Header& h = message.header;
+
+    if (message.questions.size() > 65535 ||
+    message.answers.size() > 65535 ||
+    message.authority.size() > 65535 ||
+    message.additional.size() > 65535) {
+    throw ParseError("DNS section count exceeds maximum");
+    }
 
     writer.u16(h.id);
     writer.u8(static_cast<uint8_t>((h.qr << 7) | ((h.opcode & 0x0F) << 3) | (h.aa << 2) | (h.tc << 1) | h.rd));
@@ -416,6 +448,9 @@ Message decode(const std::vector<uint8_t>& packet) {
     }
     for (uint16_t i = 0; i < additional_count; ++i) {
         message.additional.push_back(read_record(reader));
+    }
+    if (reader.position() != packet.size()) {
+        throw ParseError("Unexpected trailing bytes in DNS packet");
     }
     return message;
 }

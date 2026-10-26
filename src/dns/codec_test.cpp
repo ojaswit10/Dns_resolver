@@ -125,6 +125,69 @@ void test_malformed_packets() {
     std::vector<uint8_t> truncated = encode(make_query(1, "example.com", RecordType::A));
     truncated[7] = 1;  // claim one answer that is not there
     CHECK_THROWS(decode(truncated), ParseError);
+
+        // A compression pointer with only its first byte present.
+    CHECK_THROWS(
+        decode(std::vector<uint8_t>{
+            0x00, 0x01, // ID
+            0x00, 0x00, // Flags
+            0x00, 0x01, // QDCOUNT
+            0x00, 0x00, // ANCOUNT
+            0x00, 0x00, // NSCOUNT
+            0x00, 0x00, // ARCOUNT
+            0xC0        // Incomplete compression pointer
+        }),
+        ParseError
+    );
+
+        // TXT record declares 5 bytes but contains only 2.
+    CHECK_THROWS(
+        decode(std::vector<uint8_t>{
+            0x00, 0x01, // ID
+            0x81, 0x80, // Flags
+            0x00, 0x00, // QDCOUNT
+            0x00, 0x01, // ANCOUNT
+            0x00, 0x00, // NSCOUNT
+            0x00, 0x00, // ARCOUNT
+
+            0x00,       // Root name
+            0x00, 0x10, // TXT type
+            0x00, 0x01, // IN class
+            0x00, 0x00, 0x00, 0x3C, // TTL
+            0x00, 0x03, // RDLENGTH = 3
+            0x05,       // String length = 5
+            0x41, 0x42  // Only 2 bytes of string data
+        }),
+        ParseError
+    );
+        // CNAME RDATA contains a valid root name followed by an extra byte.
+    CHECK_THROWS(
+        decode(std::vector<uint8_t>{
+            0x00, 0x01, // ID
+            0x81, 0x80, // Flags
+            0x00, 0x00, // QDCOUNT
+            0x00, 0x01, // ANCOUNT
+            0x00, 0x00, // NSCOUNT
+            0x00, 0x00, // ARCOUNT
+
+            0x00,       // Root owner name
+            0x00, 0x05, // CNAME type
+            0x00, 0x01, // IN class
+            0x00, 0x00, 0x00, 0x3C, // TTL
+            0x00, 0x02, // RDLENGTH = 2
+            0x00,       // Valid root target name
+            0xAA        // Unexpected extra byte
+        }),
+        ParseError
+    );
+        // Packet contains an unexpected byte after all declared sections.
+    std::vector<uint8_t> packet = encode(
+        make_query(1, "example.com", RecordType::A)
+    );
+
+    packet.push_back(0xAA);
+
+    CHECK_THROWS(decode(packet), ParseError);
 }
 
 void test_helpers() {
@@ -137,7 +200,40 @@ void test_helpers() {
     CHECK(!parse_record_type("nope", type));
 }
 
+void test_invalid_name_length() {
+    // Each label is valid (63 bytes), but the complete DNS name
+    // exceeds the 255-byte wire-format limit.
+    std::string long_name =
+        std::string(63, 'a') + "." +
+        std::string(63, 'b') + "." +
+        std::string(63, 'c') + "." +
+        std::string(63, 'd');
+
+    CHECK_THROWS(
+        encode(make_query(1, long_name, RecordType::A)),
+        ParseError
+    );
+}
+
 }  // namespace
+
+void test_oversized_rdata() {
+    ResourceRecord record = make_record("example.com", RecordType::TXT, 60);
+    record.rdata = std::vector<uint8_t>(65536, 0x41);
+
+    Message message = make_query(1, "example.com", RecordType::A);
+    message.answers.push_back(record);
+
+    CHECK_THROWS(encode(message), ParseError);
+}
+
+void test_oversized_section_count() {
+    Message message = make_query(1, "example.com", RecordType::A);
+
+    message.questions.resize(65536);
+
+    CHECK_THROWS(encode(message), ParseError);
+}
 
 int main() {
     test_query_bytes();
@@ -147,5 +243,8 @@ int main() {
     test_root_name();
     test_malformed_packets();
     test_helpers();
+    test_invalid_name_length();
+    test_oversized_rdata();
+    test_oversized_section_count();
     return dns::test::report();
 }
