@@ -2,6 +2,7 @@
 
 #include <cctype>
 #include <sstream>
+#include <string>
 #include <utility>
 
 namespace dns {
@@ -9,9 +10,15 @@ namespace dns {
 namespace {
 
 const std::pair<RecordType, const char*> kTypeNames[] = {
-    {RecordType::A, "A"},     {RecordType::NS, "NS"},   {RecordType::CNAME, "CNAME"},
-    {RecordType::SOA, "SOA"}, {RecordType::MX, "MX"},   {RecordType::TXT, "TXT"},
-    {RecordType::AAAA, "AAAA"}, {RecordType::OPT, "OPT"}, {RecordType::ANY, "ANY"},
+    {RecordType::A, "A"},
+    {RecordType::NS, "NS"},
+    {RecordType::CNAME, "CNAME"},
+    {RecordType::SOA, "SOA"},
+    {RecordType::MX, "MX"},
+    {RecordType::TXT, "TXT"},
+    {RecordType::AAAA, "AAAA"},
+    {RecordType::OPT, "OPT"},
+    {RecordType::ANY, "ANY"},
 };
 
 std::string to_upper(std::string text) {
@@ -38,12 +45,18 @@ std::string to_string(RecordType type) {
 
 std::string to_string(Rcode rcode) {
     switch (rcode) {
-        case Rcode::NoError: return "NOERROR";
-        case Rcode::FormErr: return "FORMERR";
-        case Rcode::ServFail: return "SERVFAIL";
-        case Rcode::NxDomain: return "NXDOMAIN";
-        case Rcode::NotImp: return "NOTIMP";
-        case Rcode::Refused: return "REFUSED";
+        case Rcode::NoError:
+            return "NOERROR";
+        case Rcode::FormErr:
+            return "FORMERR";
+        case Rcode::ServFail:
+            return "SERVFAIL";
+        case Rcode::NxDomain:
+            return "NXDOMAIN";
+        case Rcode::NotImp:
+            return "NOTIMP";
+        case Rcode::Refused:
+            return "REFUSED";
     }
     return "RCODE" + std::to_string(static_cast<int>(rcode));
 }
@@ -56,14 +69,15 @@ bool parse_record_type(const std::string& text, RecordType& out) {
             return true;
         }
     }
-    if (upper.size() > 4 && upper.compare(0, 4, "TYPE") == 0) {
-        try {
-            const unsigned long number = std::stoul(upper.substr(4));
+    // "TYPE<n>": digits only and at most 5 of them, so stoul cannot throw or overflow.
+    if (upper.compare(0, 4, "TYPE") == 0) {
+        const std::string digits = upper.substr(4);
+        if (!digits.empty() && digits.size() <= 5 && digits.find_first_not_of("0123456789") == std::string::npos) {
+            const unsigned long number = std::stoul(digits);
             if (number <= 0xFFFF) {
                 out = static_cast<RecordType>(number);
                 return true;
             }
-        } catch (const std::exception&) {
         }
     }
     return false;
@@ -103,9 +117,9 @@ std::string to_string(const ResourceRecord& record) {
             out << record.preference << ' ' << display_name(record.target);
             break;
         case RecordType::SOA:
-            out << display_name(record.soa.mname) << ' ' << display_name(record.soa.rname) << ' '
-                << record.soa.serial << ' ' << record.soa.refresh << ' ' << record.soa.retry << ' '
-                << record.soa.expire << ' ' << record.soa.minimum;
+            out << display_name(record.soa.mname) << ' ' << display_name(record.soa.rname) << ' ' << record.soa.serial
+                << ' ' << record.soa.refresh << ' ' << record.soa.retry << ' ' << record.soa.expire << ' '
+                << record.soa.minimum;
             break;
         case RecordType::TXT:
             for (size_t i = 0; i < record.texts.size(); ++i) {
