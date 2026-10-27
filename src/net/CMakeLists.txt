@@ -3,6 +3,7 @@ add_library(dns_net
     transport.cpp
 )
 target_include_directories(dns_net PUBLIC ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(dns_net PUBLIC dns_codec)
 
 if(WIN32)
     target_link_libraries(dns_net PUBLIC ws2_32)

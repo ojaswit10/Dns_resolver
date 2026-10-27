@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <utility>
 
+#include "dns/codec.h"
 #include "net/socket_compat.h"
 
 namespace dns {
@@ -25,6 +26,11 @@ constexpr int kSendFlags = MSG_NOSIGNAL;
 #else
 constexpr int kSendFlags = 0;
 #endif
+
+bool is_truncated(const std::vector<uint8_t>& packet) {
+    // TC is bit 1 of the third header byte.
+    return packet.size() >= 4 && (packet[2] & 0x02) != 0;
+}
 
 bool write_all(net::SocketHandle socket, const std::vector<uint8_t>& data) {
     std::size_t done = 0;
@@ -160,6 +166,34 @@ std::optional<std::vector<uint8_t>> send_tcp(const std::string& server_ip, const
 
     net::close_socket(socket);
     return result;
+}
+
+std::optional<std::vector<uint8_t>> send_query(const std::string& server_ip, const std::vector<uint8_t>& query,
+                                               const TransportOptions& options) {
+    auto reply = send_udp(server_ip, query, options);
+    if (reply && is_truncated(*reply)) {
+        return send_tcp(server_ip, query, options);
+    }
+    return reply;
+}
+
+std::optional<ServerReply> query_servers(const std::vector<std::string>& servers, const std::vector<uint8_t>& query,
+                                         const TransportOptions& options) {
+    for (const std::string& server_ip : servers) {
+        const auto packet = send_query(server_ip, query, options);
+        if (!packet) {
+            continue;
+        }
+        try {
+            Message message = decode(*packet);
+            if (message.header.qr) {
+                return ServerReply{server_ip, std::move(message)};
+            }
+        } catch (const ParseError&) {
+            // A malformed reply makes this server unusable for now; fall through to the next one.
+        }
+    }
+    return std::nullopt;
 }
 
 }  // namespace dns

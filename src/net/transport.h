@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+#include "dns/message.h"
+
 namespace dns {
 
 struct TransportOptions {
@@ -26,5 +28,20 @@ std::optional<std::vector<uint8_t>> send_udp(const std::string& server_ip, const
 // Returns std::nullopt on connect failure, timeout, short read or a reply whose ID does not match.
 std::optional<std::vector<uint8_t>> send_tcp(const std::string& server_ip, const std::vector<uint8_t>& query,
                                              const TransportOptions& options = {});
+
+// Like send_udp, but if the UDP reply has the TC bit set it re-asks over TCP.
+// A truncated reply is never returned: if the TCP retry fails the result is std::nullopt.
+std::optional<std::vector<uint8_t>> send_query(const std::string& server_ip, const std::vector<uint8_t>& query,
+                                               const TransportOptions& options = {});
+
+struct ServerReply {
+    std::string server_ip;  // which server produced the reply
+    Message message;
+};
+
+// Tries `servers` in order and returns the first reply that decodes. A server that times out or sends a
+// malformed or non-response packet is skipped. Returns std::nullopt if none of them answers.
+std::optional<ServerReply> query_servers(const std::vector<std::string>& servers, const std::vector<uint8_t>& query,
+                                         const TransportOptions& options = {});
 
 }  // namespace dns
