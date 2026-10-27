@@ -22,4 +22,9 @@ struct TransportOptions {
 std::optional<std::vector<uint8_t>> send_udp(const std::string& server_ip, const std::vector<uint8_t>& query,
                                              const TransportOptions& options = {});
 
+// Sends `query` over TCP (2-byte length prefix, RFC 1035 section 4.2.2) and returns the raw response.
+// Returns std::nullopt on connect failure, timeout, short read or a reply whose ID does not match.
+std::optional<std::vector<uint8_t>> send_tcp(const std::string& server_ip, const std::vector<uint8_t>& query,
+                                             const TransportOptions& options = {});
+
 }  // namespace dns
