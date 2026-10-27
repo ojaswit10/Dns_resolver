@@ -1,4 +1,5 @@
-
+#include <chrono>
+#include <thread>
 #include "cache/cache.h"
 
 #include <cstdint>
@@ -65,6 +66,28 @@ int main() {
     positive_record.address = "192.0.2.5";
     cache.put(positive_record);
     CHECK(!cache.get_negative("missing.example.com", dns::RecordType::A).has_value());
+
+        // Re-inserting the same record should refresh its expiry.
+    dns::Cache refresh_cache;
+
+    dns::ResourceRecord refresh_record;
+    refresh_record.name = "refresh.example";
+    refresh_record.type = dns::RecordType::A;
+    refresh_record.ttl = 2;
+    refresh_record.address = "192.0.2.10";
+
+    refresh_cache.put(refresh_record);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+
+    refresh_record.ttl = 5;
+    refresh_cache.put(refresh_record);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+
+    auto refreshed = refresh_cache.get("refresh.example", dns::RecordType::A);
+    CHECK(refreshed.size() == 1);
+    CHECK(!refreshed.empty() && refreshed[0].ttl > 0);
 
     return dns::test::report();
 }
