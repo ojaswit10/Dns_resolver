@@ -6,6 +6,9 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+// <windows.h> defines IN and OUT as empty macros, which break RecordClass::IN.
+#undef IN
+#undef OUT
 #else
 #include <arpa/inet.h>
 #include <netinet/in.h>

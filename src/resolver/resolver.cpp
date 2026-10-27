@@ -326,7 +326,7 @@ std::optional<Message> Resolver::ask(const ServerSet& servers, const std::string
 
         const std::vector<uint8_t> query = encode(make_query(static_cast<uint16_t>(random_()), name, type));
         const std::optional<std::vector<uint8_t>> reply =
-            options_.query ? options_.query(ip, query) : send_udp(ip, query, options_.transport);
+            options_.query ? options_.query(ip, query) : send_query(ip, query, options_.transport);
         if (!reply) {
             log(depth, "  no reply, trying next server");
             continue;

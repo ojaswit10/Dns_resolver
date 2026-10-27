@@ -18,7 +18,8 @@
 namespace dns {
 
 // Sends raw query bytes to a server IP and returns the raw reply. Defaults to
-// send_udp(); tests swap in a fake so they run without the internet.
+// send_query() (UDP, retried over TCP when truncated); tests swap in a fake so
+// they run without the internet.
 using QueryFunction =
     std::function<std::optional<std::vector<uint8_t>>(const std::string& server_ip, const std::vector<uint8_t>& query)>;
 
@@ -27,7 +28,7 @@ struct ResolverOptions {
     int max_cname_hops = 8;  // aliases followed before giving up
     int max_depth = 4;       // nesting of lookups for nameservers that came without glue
     TransportOptions transport = {1500, 1, 53};
-    QueryFunction query;                    // empty = real UDP
+    QueryFunction query;                    // empty = real network
     std::vector<std::string> root_servers;  // empty = built-in root hints
 
     // Set when several Resolvers on different threads share one Cache: every

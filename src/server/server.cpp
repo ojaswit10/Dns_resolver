@@ -7,11 +7,6 @@
 
 #include "dns/codec.h"
 
-// <windows.h> defines IN as an empty macro, which breaks RecordClass::IN.
-#ifdef IN
-#undef IN
-#endif
-
 namespace dns {
 
 namespace {
