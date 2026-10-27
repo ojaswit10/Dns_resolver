@@ -1,5 +1,5 @@
 
-#include "cache.h"
+#include "cache/cache.h"
 
 #include <algorithm>
 #include <chrono>
@@ -65,13 +65,40 @@ void Cache::put(const ResourceRecord& record) {
     const auto expires_at = std::chrono::steady_clock::now() +
                             std::chrono::seconds(record.ttl);
 
-    entries_[key].push_back({record, expires_at});
+    auto& records = entries_[key];
 
-    // New positive data invalidates matching negative cache entries.
+    for (auto& entry : records) {
+        const auto& old = entry.record;
+
+        const bool same_data =
+            old.rdata == record.rdata &&
+            old.address == record.address &&
+            old.target == record.target &&
+            old.preference == record.preference &&
+            old.soa.mname == record.soa.mname &&
+            old.soa.rname == record.soa.rname &&
+            old.soa.serial == record.soa.serial &&
+            old.soa.refresh == record.soa.refresh &&
+            old.soa.retry == record.soa.retry &&
+            old.soa.expire == record.soa.expire &&
+            old.soa.minimum == record.soa.minimum &&
+            old.texts == record.texts;
+
+        if (same_data) {
+            entry.record = record;
+            entry.expires_at = expires_at;
+
+            negative_entries_.erase(make_nxdomain_key(record.name));
+            negative_entries_.erase(make_nodata_key(record.name, record.type));
+            return;
+        }
+    }
+
+    records.push_back({record, expires_at});
+
     negative_entries_.erase(make_nxdomain_key(record.name));
     negative_entries_.erase(make_nodata_key(record.name, record.type));
 }
-
 void Cache::put_negative(
     const std::string& name,
     RecordType type,

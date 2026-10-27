@@ -1,5 +1,5 @@
 
-#include "cache.h"
+#include "cache/cache.h"
 
 #include <cstdint>
 #include <string>
@@ -17,6 +17,11 @@ int main() {
     record.address = "93.184.216.34";
 
     cache.put(record);
+    //new adition as per cnmame
+    cache.put(record);
+
+    auto duplicate_result = cache.get("example.com", dns::RecordType::A);
+    CHECK(duplicate_result.size() == 1);
 
     auto result = cache.get("EXAMPLE.COM", dns::RecordType::A);
     CHECK(result.size() == 1);
