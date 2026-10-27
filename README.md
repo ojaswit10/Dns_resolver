@@ -7,6 +7,8 @@ level, with no DNS libraries. Instead of forwarding questions to a resolver like
 8.8.8.8, it walks the DNS hierarchy itself, **root → TLD → authoritative**, then
 caches what it learns so repeated lookups are answered locally.
 
+📄 **[Project report](docs/REPORT.md)** · 🎤 **[Viva prep and demo script](docs/VIVA.md)**
+
 ## Team
 
 | Member | Owns | Folder |
@@ -93,6 +95,7 @@ src/server/     caching DNS server, `serve` CLI (+ server_test)
 src/common/     tiny test helpers
 tools/          dns_query (one raw query), experiment (benchmark harness)
 experiment/     lookup lists, plot script, results
+docs/           project report, viva prep
 ```
 
 ## Build
