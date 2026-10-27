@@ -34,4 +34,7 @@ void close_socket(SocketHandle socket);
 // Waits until `socket` is readable. Returns false on timeout or error.
 bool wait_readable(SocketHandle socket, int timeout_ms);
 
+// Connects `socket` to `server`, giving up after `timeout_ms`. Returns false on timeout or error.
+bool connect_with_timeout(SocketHandle socket, const sockaddr_in& server, int timeout_ms);
+
 }  // namespace dns::net
