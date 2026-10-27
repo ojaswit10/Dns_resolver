@@ -1,0 +1,33 @@
+# Long-tail names: smaller sites spread across many TLDs and providers, plus
+# names that do not exist, so the resolver has to walk new delegations.
+# One lookup per line: <name> [type]   (type defaults to A)
+kiit.ac.in
+www.iitb.ac.in
+iitkgp.ac.in
+www.bbc.co.uk
+www.ox.ac.uk
+www.ethz.ch
+www.tum.de
+www.uni-heidelberg.de
+www.u-tokyo.ac.jp
+www.anu.edu.au
+www.nlnetlabs.nl
+www.isc.org
+www.rfc-editor.org
+www.iana.org
+sqlite.org
+www.lua.org
+ocaml.org
+www.haskell.org
+www.gnu.org
+kernel.org
+www.debian.org
+archlinux.org
+www.openbsd.org
+www.netbsd.org
+www.postgresql.org
+www.eff.org
+www.torproject.org
+arxiv.org
+does-not-exist-zz9.example.com
+no-such-host-zz9.kiit.ac.in

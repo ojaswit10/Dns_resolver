@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+<rect width="760" height="440" fill="#ffffff"/>
+<text x="380.0" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="#222">Upstream queries per lookup</text>
+<line x1="70" y1="330.0" x2="740" y2="330.0" stroke="#e5e5e5"/>
+<text x="62" y="334.0" text-anchor="end" fill="#555">0</text>
+<line x1="70" y1="276.0" x2="740" y2="276.0" stroke="#e5e5e5"/>
+<text x="62" y="280.0" text-anchor="end" fill="#555">2</text>
+<line x1="70" y1="222.0" x2="740" y2="222.0" stroke="#e5e5e5"/>
+<text x="62" y="226.0" text-anchor="end" fill="#555">4</text>
+<line x1="70" y1="168.0" x2="740" y2="168.0" stroke="#e5e5e5"/>
+<text x="62" y="172.0" text-anchor="end" fill="#555">6</text>
+<line x1="70" y1="114.0" x2="740" y2="114.0" stroke="#e5e5e5"/>
+<text x="62" y="118.0" text-anchor="end" fill="#555">8</text>
+<line x1="70" y1="60.0" x2="740" y2="60.0" stroke="#e5e5e5"/>
+<text x="62" y="64.0" text-anchor="end" fill="#555">10</text>
+<text x="18" y="195.0" text-anchor="middle" fill="#333" transform="rotate(-90 18 195.0)">queries sent to nameservers</text>
+<rect x="125.8" y="200.1" width="67.0" height="129.9" fill="#c0392b"/>
+<text x="159.3" y="194.1" text-anchor="middle" fill="#222">4.81</text>
+<rect x="200.3" y="257.1" width="67.0" height="72.9" fill="#e1a031"/>
+<text x="233.8" y="251.1" text-anchor="middle" fill="#222">2.70</text>
+<rect x="274.7" y="330.0" width="67.0" height="0.0" fill="#1f7a8c"/>
+<text x="308.2" y="324.0" text-anchor="middle" fill="#222">0.00</text>
+<text x="237.5" y="352" text-anchor="middle" font-weight="600" fill="#222">popular</text>
+<rect x="460.8" y="190.2" width="67.0" height="139.8" fill="#c0392b"/>
+<text x="494.3" y="184.2" text-anchor="middle" fill="#222">5.18</text>
+<rect x="535.3" y="237.6" width="67.0" height="92.4" fill="#e1a031"/>
+<text x="568.8" y="231.6" text-anchor="middle" fill="#222">3.42</text>
+<rect x="609.7" y="330.0" width="67.0" height="0.0" fill="#1f7a8c"/>
+<text x="643.2" y="324.0" text-anchor="middle" fill="#222">0.00</text>
+<text x="572.5" y="352" text-anchor="middle" font-weight="600" fill="#222">long_tail</text>
+<line x1="70" y1="330.0" x2="740" y2="330.0" stroke="#999"/>
+<rect x="70" y="395" width="14" height="14" fill="#c0392b"/>
+<text x="90" y="407" fill="#333">no cache (full walk every time)</text>
+<rect x="290" y="395" width="14" height="14" fill="#e1a031"/>
+<text x="310" y="407" fill="#333">cold cache (starts empty)</text>
+<rect x="510" y="395" width="14" height="14" fill="#1f7a8c"/>
+<text x="530" y="407" fill="#333">warm cache (second pass)</text>
+</svg>

@@ -80,6 +80,12 @@ public:
             } else if (ends_with(q.name, "provider.test")) {
                 reply.authority.push_back(name_record("provider.test", RecordType::NS, "ns.provider.test"));
                 reply.additional.push_back(a_record("ns.provider.test", "10.0.0.4"));
+            } else if (ends_with(q.name, "lame.test")) {
+                // The first nameserver listed is lame; the second one works.
+                reply.authority.push_back(name_record("lame.test", RecordType::NS, "ns1.lame.test"));
+                reply.authority.push_back(name_record("lame.test", RecordType::NS, "ns2.lame.test"));
+                reply.additional.push_back(a_record("ns1.lame.test", "10.0.0.5"));
+                reply.additional.push_back(a_record("ns2.lame.test", "10.0.0.6"));
             } else if (ends_with(q.name, "other.test")) {
                 reply.authority.push_back(name_record("other.test", RecordType::NS, "ns.provider.test"));
             } else {
@@ -109,6 +115,19 @@ public:
             } else {
                 reply.header.rcode = Rcode::NxDomain;
                 reply.authority.push_back(soa_record("example.test"));
+            }
+        };
+
+        // Lame, like dns2.openbsd.org: not authoritative, and refers back to its own zone.
+        servers_["10.0.0.5"] = [](const Question&, Message& reply) {
+            reply.authority.push_back(name_record("lame.test", RecordType::NS, "ns1.lame.test"));
+            reply.authority.push_back(name_record("lame.test", RecordType::NS, "ns2.lame.test"));
+        };
+
+        servers_["10.0.0.6"] = [](const Question& q, Message& reply) {
+            reply.header.aa = true;
+            if (q.name == "www.lame.test") {
+                reply.answers.push_back(a_record("www.lame.test", "9.9.9.9"));
             }
         };
 
@@ -263,6 +282,16 @@ void test_cname_loop_terminates() {
     CHECK(result.status == ResolveStatus::ServFail);
 }
 
+void test_lame_server_is_skipped() {
+    FakeNetwork network;
+    Resolver resolver(nullptr, fake_options(network));
+
+    const ResolveResult result = resolver.resolve("www.lame.test", RecordType::A);
+    CHECK(result.status == ResolveStatus::Ok);
+    CHECK(has_address(result, "9.9.9.9"));
+    CHECK(network.queries_by_server["10.0.0.5"] == 1);
+}
+
 void test_no_duplicate_cache_entries() {
     FakeNetwork network;
     Cache cache;
@@ -284,6 +313,7 @@ int main() {
     test_nodata();
     test_unreachable_server_is_skipped();
     test_cname_loop_terminates();
+    test_lame_server_is_skipped();
     test_no_duplicate_cache_entries();
     return dns::test::report();
 }

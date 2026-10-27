@@ -350,6 +350,22 @@ std::optional<Message> Resolver::ask(const ServerSet& servers, const std::string
             log(depth, "  " + to_string(message.header.rcode) + ", trying next server");
             continue;
         }
+        // A lame server is listed for the zone but doesn't serve it: no answer, no
+        // referral, no SOA and not authoritative. Another server of the zone may work.
+        // A referral only helps if it points below the zone we asked; one back to the
+        // same zone (or above it) is just as useless as an empty reply.
+        const bool useful_authority =
+            std::any_of(message.authority.begin(), message.authority.end(), [&](const ResourceRecord& r) {
+                return r.type == RecordType::SOA ||
+                       (r.type == RecordType::NS && is_subdomain(name, r.name) && is_subdomain(r.name, servers.zone) &&
+                        !names_equal(r.name, servers.zone));
+            });
+        const bool lame = message.header.rcode == Rcode::NoError && message.answers.empty() && !message.header.aa &&
+                          !useful_authority;
+        if (lame) {
+            log(depth, "  lame server (no answer and no useful referral), trying next server");
+            continue;
+        }
         return message;
     }
     return std::nullopt;

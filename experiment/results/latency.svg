@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 440" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+<rect width="760" height="440" fill="#ffffff"/>
+<text x="380.0" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="#222">Lookup latency: no cache vs cold vs warm</text>
+<line x1="70" y1="330.0" x2="740" y2="330.0" stroke="#e5e5e5"/>
+<text x="62" y="334.0" text-anchor="end" fill="#555">0</text>
+<line x1="70" y1="276.0" x2="740" y2="276.0" stroke="#e5e5e5"/>
+<text x="62" y="280.0" text-anchor="end" fill="#555">500</text>
+<line x1="70" y1="222.0" x2="740" y2="222.0" stroke="#e5e5e5"/>
+<text x="62" y="226.0" text-anchor="end" fill="#555">1000</text>
+<line x1="70" y1="168.0" x2="740" y2="168.0" stroke="#e5e5e5"/>
+<text x="62" y="172.0" text-anchor="end" fill="#555">1500</text>
+<line x1="70" y1="114.0" x2="740" y2="114.0" stroke="#e5e5e5"/>
+<text x="62" y="118.0" text-anchor="end" fill="#555">2000</text>
+<line x1="70" y1="60.0" x2="740" y2="60.0" stroke="#e5e5e5"/>
+<text x="62" y="64.0" text-anchor="end" fill="#555">2500</text>
+<text x="18" y="195.0" text-anchor="middle" fill="#333" transform="rotate(-90 18 195.0)">milliseconds</text>
+<rect x="125.8" y="285.2" width="67.0" height="44.8" fill="#c0392b"/>
+<line x1="159.3" y1="285.2" x2="159.3" y2="103.0" stroke="#333"/>
+<line x1="153.3" y1="103.0" x2="165.3" y2="103.0" stroke="#333"/>
+<text x="159.3" y="97.0" text-anchor="middle" fill="#222">414</text>
+<rect x="200.3" y="307.9" width="67.0" height="22.1" fill="#e1a031"/>
+<line x1="233.8" y1="307.9" x2="233.8" y2="256.3" stroke="#333"/>
+<line x1="227.8" y1="256.3" x2="239.8" y2="256.3" stroke="#333"/>
+<text x="233.8" y="250.3" text-anchor="middle" fill="#222">205</text>
+<rect x="274.7" y="330.0" width="67.0" height="0.0" fill="#1f7a8c"/>
+<line x1="308.2" y1="330.0" x2="308.2" y2="330.0" stroke="#333"/>
+<line x1="302.2" y1="330.0" x2="314.2" y2="330.0" stroke="#333"/>
+<text x="308.2" y="324.0" text-anchor="middle" fill="#222">0</text>
+<text x="237.5" y="352" text-anchor="middle" font-weight="600" fill="#222">popular</text>
+<rect x="460.8" y="259.8" width="67.0" height="70.2" fill="#c0392b"/>
+<line x1="494.3" y1="259.8" x2="494.3" y2="117.6" stroke="#333"/>
+<line x1="488.3" y1="117.6" x2="500.3" y2="117.6" stroke="#333"/>
+<text x="494.3" y="111.6" text-anchor="middle" fill="#222">650</text>
+<rect x="535.3" y="289.4" width="67.0" height="40.6" fill="#e1a031"/>
+<line x1="568.8" y1="289.4" x2="568.8" y2="211.6" stroke="#333"/>
+<line x1="562.8" y1="211.6" x2="574.8" y2="211.6" stroke="#333"/>
+<text x="568.8" y="205.6" text-anchor="middle" fill="#222">376</text>
+<rect x="609.7" y="330.0" width="67.0" height="0.0" fill="#1f7a8c"/>
+<line x1="643.2" y1="330.0" x2="643.2" y2="330.0" stroke="#333"/>
+<line x1="637.2" y1="330.0" x2="649.2" y2="330.0" stroke="#333"/>
+<text x="643.2" y="324.0" text-anchor="middle" fill="#222">0</text>
+<text x="572.5" y="352" text-anchor="middle" font-weight="600" fill="#222">long_tail</text>
+<line x1="70" y1="330.0" x2="740" y2="330.0" stroke="#999"/>
+<rect x="70" y="395" width="14" height="14" fill="#c0392b"/>
+<text x="90" y="407" fill="#333">no cache (full walk every time)</text>
+<rect x="290" y="395" width="14" height="14" fill="#e1a031"/>
+<text x="310" y="407" fill="#333">cold cache (starts empty)</text>
+<rect x="510" y="395" width="14" height="14" fill="#1f7a8c"/>
+<text x="530" y="407" fill="#333">warm cache (second pass)</text>
+<text x="70" y="428" fill="#666">Bars show the median (p50); whiskers show p95.</text>
+</svg>

@@ -1,0 +1,32 @@
+# Popular names: big sites whose zones every resolver sees all the time.
+# One lookup per line: <name> [type]   (type defaults to A)
+google.com
+www.google.com
+youtube.com
+www.youtube.com
+facebook.com
+www.facebook.com
+instagram.com
+whatsapp.com
+wikipedia.org
+www.wikipedia.org
+amazon.com
+www.amazon.com
+twitter.com
+x.com
+linkedin.com
+www.linkedin.com
+github.com
+www.github.com
+microsoft.com
+www.microsoft.com
+apple.com
+www.apple.com
+netflix.com
+reddit.com
+www.reddit.com
+yahoo.com
+bing.com
+stackoverflow.com
+gmail.com MX
+google.com AAAA
